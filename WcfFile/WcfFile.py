@@ -175,7 +175,7 @@ class WcfFile:
 			end=5592+i*(self.fileheader.ImagesSize+944)+imageheader.Width*imageheader.Height*2
 			flatimage=np.array(struct.Struct(f'{imageheader.Width*imageheader.Height}H').unpack(c[start:end]))
 			image=flatimage.reshape(imageheader.Width,imageheader.Height)
-			self.images.append({"imageheader":imageheader,"imagedata": image})
+			self.images.append({"imageheader":imageheader._asdict(),"imagedata": image})
 		f.close()
 			
 	def getFileAttributes(self):
@@ -186,3 +186,6 @@ class WcfFile:
 			
 	def getAverageImage(self):
 		return np.mean(np.stack([x["imagedata"] for x in self.images],axis=0),axis=0)
+	
+	def getStdImage(self):
+		return np.std(np.stack([x["imagedata"] for x in self.images],axis=0),axis=0)

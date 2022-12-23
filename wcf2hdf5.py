@@ -27,17 +27,17 @@ if __name__ == "__main__":
 	print(f"Saving to {args.outputfile}")
 	
 	hf = h5py.File(args.outputfile, 'w')
-	for filename in tqdm(args.files,unit='files'):
+	for filename in tqdm(args.files,unit='file(s)'):
 		currentWcf=WcfFile(filename)
 		
 		#create a group for the current file
-		h5group=hf.create_group(filename)
+		h5group=hf.create_group(filename,track_order=True)
 		for attribute in currentWcf.getFileAttributes().items():
 			h5group.attrs[attribute[0]]=repr(attribute[1])
 		
 		#create datasets for all images in the file
 		for i,image in enumerate(currentWcf.getImages()):
-			imagedset=h5group.create_dataset(f"Image{i}",data=image["imagedata"])
+			imagedset=h5group.create_dataset(f"Image{i}",data=image["imagedata"],track_order=True)
 			for attribute in image["imageheader"]._asdict().items():
 				imagedset.attrs[attribute[0]]=repr(attribute[1])
 

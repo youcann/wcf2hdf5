@@ -8,7 +8,12 @@ class WcfFile:
 		#open file at given path as binary file
 		f=open(path,'rb')
 		c=f.read()
-		# 5592 bytes file header, only take first 60 bytes
+		
+		#Before trying to parse the data, check if the first bytes contain the "DRI" signature
+		if not c[1:4].decode("UTF-8")[::-1]=="DRI":
+			raise ValueError(f"The file {path} does not seem to contain the necessary signature. Is it broken?")
+		
+		#5592 bytes file header, only take first 60 bytes
 		fileheaderStructure=[('Signature','4s'),
 							('Type','i'),
 							('Size','i'),
@@ -18,7 +23,7 @@ class WcfFile:
 		Fileheader=namedtuple('Fileheader', [x[0] for x in fileheaderStructure])
 		self.fileheader=Fileheader._make(struct.Struct(''.join([x[1] for x in fileheaderStructure])).unpack(c[0:60]))
 		
-		# Number of "Images" blocks of image data. Each block contains a 944 bytes header followed by the raw data (2 bytes/pixel)
+		#Number of "Images" blocks of image data. Each block contains a 944 bytes header followed by the raw data (2 bytes/pixel)
 		imageheaderStructure=[('Signature','4s'),
 							('Type','i'),
 							('Index','i'),
@@ -164,7 +169,7 @@ class WcfFile:
 							]
 		Imageheader=namedtuple('Imageheader', [x[0] for x in imageheaderStructure])
 		self.images=list()
-		for i in tqdm(range(self.fileheader.Images), leave=False, unit='images'):
+		for i in tqdm(range(self.fileheader.Images), leave=False, unit='image(s)'):
 			imageheader=Imageheader._make(struct.Struct(''.join([x[1] for x in imageheaderStructure])).unpack(c[5592:5592+struct.calcsize(''.join([x[1] for x in imageheaderStructure]))]))
 			start=5592+i*(self.fileheader.ImagesSize+944)
 			end=5592+i*(self.fileheader.ImagesSize+944)+imageheader.Width*imageheader.Height*2

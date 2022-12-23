@@ -2,7 +2,7 @@
 
 Wcf2hdf5 converts .wcf files from DataRay beam profiling cameras to the hdf5 format.
 
-![screenshot](/home/marvin/gitrepos/wcf2hdf5/screenshot.png)
+![screenshot](screenshot.png)
 
 ## Usage
 

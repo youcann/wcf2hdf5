@@ -173,5 +173,11 @@ class WcfFile:
 			self.images.append({"imageheader":imageheader,"imagedata": image})
 		f.close()
 			
+	def getFileAttributes(self):
+		return self.fileheader._asdict()
+		
+	def getImages(self):
+		return self.images
+			
 	def getAverageImage(self):
 		return np.mean(np.stack([x["imagedata"] for x in self.images],axis=0),axis=0)

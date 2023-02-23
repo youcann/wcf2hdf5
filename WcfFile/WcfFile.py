@@ -22,6 +22,7 @@ class WcfFile:
 							('Version','40s')]
 		Fileheader=namedtuple('Fileheader', [x[0] for x in fileheaderStructure])
 		self.fileheader=Fileheader._make(struct.Struct(''.join([x[1] for x in fileheaderStructure])).unpack(c[0:60]))
+		self.version=self.fileheader.Version[0:6].decode('utf-8')
 		
 		#Number of "Images" blocks of image data. Each block contains a 944 bytes header followed by the raw data (2 bytes/pixel)
 		imageheaderStructure=[('Signature','4s'),
@@ -42,7 +43,7 @@ class WcfFile:
 							('Xlimit','i'),
 							('Ylimit','i'),
 							('OrientationDone','i'),
-							('pPeakCenter','d'), #CPoint==double?
+							('pPeakCenter','q'),
 							('DefinedFluencePower','d'),
 							('pUserCentroid_0','d'),
 							('pUserCentroid_1','d'),
@@ -171,10 +172,14 @@ class WcfFile:
 		self.images=list()
 		for i in tqdm(range(self.fileheader.Images), leave=False, unit='image(s)'):
 			imageheader=Imageheader._make(struct.Struct(''.join([x[1] for x in imageheaderStructure])).unpack(c[5592:5592+struct.calcsize(''.join([x[1] for x in imageheaderStructure]))]))
-			start=5592+i*(self.fileheader.ImagesSize+944)
-			end=5592+i*(self.fileheader.ImagesSize+944)+imageheader.Width*imageheader.Height*2
+			if self.version.startswith("8.0C"):
+				start=5592+944-8+i*self.fileheader.ImagesSize
+				end=5592+944+imageheader.Width*imageheader.Height*2-8+i*self.fileheader.ImagesSize
+			else:
+				start=5592+944-8+i*imageheader.Size
+				end=5592+944+imageheader.Width*imageheader.Height*2-8+i*imageheader.Size
 			flatimage=np.array(struct.Struct(f'{imageheader.Width*imageheader.Height}H').unpack(c[start:end]))
-			image=flatimage.reshape(imageheader.Width,imageheader.Height)
+			image=flatimage.reshape(imageheader.Height,imageheader.Width)
 			self.images.append({"imageheader":imageheader._asdict(),"imagedata": image})
 		f.close()
 			

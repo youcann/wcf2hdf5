@@ -6,7 +6,7 @@ Wcf2hdf5 converts .wcf files from DataRay beam profiling cameras to the hdf5 for
 
 ## Usage
 
-```bash
+```
 $> ./wcf2hdf5.py --help
 usage: wcf2hdf5.py [OPTION] [files]...
 
@@ -24,6 +24,15 @@ options:
   -s, --stdimage, --no-stdimage
                         Calculates the std's of all images in a file (default: True)
 ```
+For example, to convert all files in the folder `test`, do:
+```
+$> ./wcf2hdf5.py test/*.*
+```
+Since we haven't specified an output file name, this puts all the files as different groups in a file called `output.hdf`.
+
+## Known Issues
+
+* The WCF-files exported by the WinCamD Software are different at least for Version 8.0Cxy and 8.0Dxy. Files from 8.0C and 8.0D should work.
 
 ## Setup
 
